@@ -15,9 +15,25 @@ server.on('request',function(req,res){
       res.write(data);
       res.end();
     });
+    //should i have nested if with get and post options within elsif below?
   }else if (reqpath === '/todos' && req.method === 'GET'){
     var json = JSON.stringify(dummydata);
     res.write(json);
+    res.end();
+  }else if(reqpath === '/todos' && req.method === 'POST'){
+    console.log('post recieved');
+    var body = '';
+    req.on('data', function(data){
+      body += data;
+    });
+    req.on('end', function(){
+      dummydata.push(body);
+      console.log(dummydata);
+    });
+    res.statusCode = 200;
+    res.end();
+  }else{
+    res.statusCode = 404;
     res.end();
   }
 });
