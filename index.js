@@ -1,51 +1,45 @@
 var subut = document.querySelector("[type = 'submit']");
 var inbox = document.querySelector("[type = 'text']");
 var ul = document.querySelector('ul')
-var masterlist = {};
+var crypto = require('crypto');
+var todolist = {};
 var addtodo = function(mssg,id){
   var todoitem = document.createElement("li");
   todoitem.innerText = mssg;
   var rembut = document.createElement('button');
   rembut.innerText = 'Delete Item';
   //add class to left align buttons?
+  //run through namespaces/closures in this case
   rembut.addEventListener('click', function(){
-    var obj2del = {};
-    obj2del[id] = mssg;
-    var json = JSON.stringify(obj2del);
-    //this will jsut go away and we can use addtodo
-    //ul.removeChild(pardiv);
     var xhr = new XMLHttpRequest();
-    xhr.open('DELETE','/todos');
-    //need to figure out what event below is
+    xhr.open('DELETE','/todos/'+id);
     xhr.addEventListener('load',function(){
-      var respjson = JSON.parse(this.responseText);
-      ul.innerText = '';
-      for (var incitem in respjson){
-        addtodo(respjson[incitem],incitem);
+      if(this.status !== 200){
+        alert('Removal failed. Try again.');
+      }else{
+        ul.innerText = '';
+        delete todolist[id];
+        for (var uids in todolist){
+          addtodo(todolist[uids],uids);
+        }
       };
-      console.log(respjson);
     });
-    xhr.send(json);
+    xhr.send();
   });
   todoitem.appendChild(rembut);
   ul.appendChild(todoitem);
 };
-//everything should be coming from server
+
 var inittodos = function(){
   var xhr = new XMLHttpRequest();
-
   xhr.open('GET','/todos');
-
   xhr.addEventListener('load',function(){
-    var json = this.responseText;
-    var petd = JSON.parse(json);
+    var petd = JSON.parse(this.responseText);
     for (var incitem in petd){
-      console.log(incitem);
-      //addtodo(petd[incitem]);
+      todolist[incitem] = petd[incitem];
       addtodo(petd[incitem],incitem);
     };
   });
-
   xhr.send();
 };
 inittodos();
@@ -53,21 +47,22 @@ inittodos();
 subut.addEventListener('click',function(){
   var xhr = new XMLHttpRequest();
   xhr.open('POST','/todos');
-  var json = JSON.stringify(inbox.value);
-  xhr.send(json);
+  var uid = crypto.randomBytes(7).toString('hex');
+  var obj2send = {};
+  obj2send[uid] = inbox.value;
+  var json = JSON.stringify(obj2send);
   xhr.addEventListener('load',function(){
     if(this.status !== 200){
       alert('Something went wrong.');
     }else{
-      //this shouldnt be written twice
-      var json = this.responseText;
-      var petd = JSON.parse(json);
       ul.innerText = '';
-      for (var incitem in petd){
-        addtodo(petd[incitem],incitem);
-      };
+      todolist[uid] = inbox.value;
+      for (var uids in todolist){
+        addtodo(todolist[uids],uids);
+      }
       inbox.value = '';
     }
   });
+  xhr.send(json);
 });
 

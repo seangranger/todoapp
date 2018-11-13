@@ -1,14 +1,12 @@
 var http = require('http');
 var server = http.createServer();
 var fs = require('fs');
-var pages = ['/index.html','/index.js'];
-var counter = 4;
+var pages = ['/app.js','/index.html','/index.js'];
 var dummydata = {1:'eat',2:'pray',3:'kill for satan'};
 server.on('listening',function(){
   console.log('listening...');
 });
 server.on('request',function(req,res){
-  console.log(req.method);
   var reqpath = req.url;
   if (pages.includes(reqpath) && req.method === 'GET'){
     fs.readFile('.'+reqpath,'utf8',function(err,data){
@@ -28,34 +26,19 @@ server.on('request',function(req,res){
       body += data;
     });
     req.on('end', function(){
-      //this needs to distinguish between removals and additions
-      dummydata[counter] = JSON.parse(body);
-      counter += 1;
-      var json = JSON.stringify(dummydata);
+      var mssg = JSON.parse(body);
+      //is this really a good way to do it?
+      dummydata[Object.keys(mssg)[0]] = Object.values(mssg)[0];
       res.statusCode = 200;
-      res.write(json);
       res.end();
     });
     //below can be folded into above else if?-think that would be good
-  }else if (reqpath === '/todos' && req.method === 'DELETE'){
-    var body = '';
-    req.on('data',function(data){
-      body += data;
-    });
+  }else if (reqpath.substring(0,7) === '/todos/' && req.method === 'DELETE'){
     req.on('end', function(){
-      console.log(body);
-      var json = JSON.parse(body);
-      for(var key in json){
-        console.log('this is dummydata[key] '+dummydata[key]);
-        delete dummydata[key];
-      }
-      var outjson = JSON.stringify(dummydata);
-      res.statusCode = 200;
-      console.log(outjson);
-      res.write(outjson);
-      res.end();
-      console.log('this is dummydata'+JSON.stringify(dummydata));
+      delete dummydata[reqpath.substring(7)];
     });
+    res.statusCode = 200;
+    res.end();
   }else{
     res.statusCode = 404;
     res.end();
