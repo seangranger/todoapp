@@ -7,13 +7,12 @@ var todolist = {};
 var rendertodos = function(){
   ul.innerText = '';
   for (var uids in todolist){
-    addtodo(todolist[uids],uids);
+    ul.appendChild(createtodo(todolist[uids],uids));
   }
 };
 
-var addtodo = function(mssg,id){
+var createtodo = function(mssg,id){
   //add class to left align buttons?
-  //run through namespaces/closures in this case
   var rembut = function(){
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE','/todos/'+id);
@@ -33,7 +32,7 @@ var addtodo = function(mssg,id){
       </button>
     </li>
   `;
-  ul.appendChild(todoitem);
+  return todoitem;
 };
 
 var inittodos = function(){
