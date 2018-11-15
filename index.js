@@ -3,6 +3,13 @@ var inbox = document.querySelector("[type = 'text']");
 var ul = document.querySelector('ul')
 var crypto = require('crypto');
 var todolist = {};
+var rendertodos = function(){
+  ul.innerText = '';
+  for (var uids in todolist){
+    addtodo(todolist[uids],uids);
+  }
+};
+
 var addtodo = function(mssg,id){
   var todoitem = document.createElement("li");
   todoitem.innerText = mssg;
@@ -17,11 +24,8 @@ var addtodo = function(mssg,id){
       if(this.status !== 200){
         alert('Removal failed. Try again.');
       }else{
-        ul.innerText = '';
         delete todolist[id];
-        for (var uids in todolist){
-          addtodo(todolist[uids],uids);
-        }
+        rendertodos();
       };
     });
     xhr.send();
@@ -34,11 +38,8 @@ var inittodos = function(){
   var xhr = new XMLHttpRequest();
   xhr.open('GET','/todos');
   xhr.addEventListener('load',function(){
-    var petd = JSON.parse(this.responseText);
-    for (var incitem in petd){
-      todolist[incitem] = petd[incitem];
-      addtodo(petd[incitem],incitem);
-    };
+    todolist = JSON.parse(this.responseText);
+    rendertodos();
   });
   xhr.send();
 };
@@ -55,11 +56,8 @@ subut.addEventListener('click',function(){
     if(this.status !== 200){
       alert('Something went wrong.');
     }else{
-      ul.innerText = '';
       todolist[uid] = inbox.value;
-      for (var uids in todolist){
-        addtodo(todolist[uids],uids);
-      }
+      rendertodos();
       inbox.value = '';
     }
   });
