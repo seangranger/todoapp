@@ -2,6 +2,7 @@ var subut = document.querySelector("[type = 'submit']");
 var inbox = document.querySelector("[type = 'text']");
 var ul = document.querySelector('ul')
 var crypto = require('crypto');
+var html = require('nanohtml');
 var todolist = {};
 var rendertodos = function(){
   ul.innerText = '';
@@ -11,13 +12,9 @@ var rendertodos = function(){
 };
 
 var addtodo = function(mssg,id){
-  var todoitem = document.createElement("li");
-  todoitem.innerText = mssg;
-  var rembut = document.createElement('button');
-  rembut.innerText = 'Delete Item';
   //add class to left align buttons?
   //run through namespaces/closures in this case
-  rembut.addEventListener('click', function(){
+  var rembut = function(){
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE','/todos/'+id);
     xhr.addEventListener('load',function(){
@@ -29,8 +26,13 @@ var addtodo = function(mssg,id){
       };
     });
     xhr.send();
-  });
-  todoitem.appendChild(rembut);
+  };
+  var todoitem = html`
+    <li>${mssg}
+      <button onclick =${rembut}>Delete Item
+      </button>
+    </li>
+  `;
   ul.appendChild(todoitem);
 };
 
