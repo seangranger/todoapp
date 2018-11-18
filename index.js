@@ -3,12 +3,15 @@ var inbox = document.querySelector("[type = 'text']");
 var ul = document.querySelector('ul')
 var crypto = require('crypto');
 var html = require('nanohtml');
+var morph = require('nanomorph');
 var todolist = {};
 var rendertodos = function(){
-  ul.innerText = '';
+  var somearr =[];
   for (var uids in todolist){
-    ul.appendChild(createtodo(todolist[uids],uids));
+    somearr.push(createtodo(todolist[uids],uids));
   }
+  var newul = html`<ul>${somearr}</ul>`;
+  morph(ul,newul);
 };
 
 var createtodo = function(mssg,id){

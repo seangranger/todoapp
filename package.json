@@ -10,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nanohtml": "^1.2.6"
+    "nanohtml": "^1.2.6",
+    "nanomorph": "^5.1.3"
   },
   "devDependencies": {
     "browserify": "^16.2.3"
