@@ -1,8 +1,10 @@
 var http = require('http');
+var querystring = require('querystring');
 var server = http.createServer();
 var fs = require('fs');
-var pages = ['/app.js','/index.html','/index.js'];
+var pages = ['/login.html','/app.js','/index.html','/index.js'];
 var dummydata = {1:'eat',2:'pray',3:'kill for satan'};
+var dummyusers = {'user1':'password1'};
 server.on('listening',function(){
   console.log('listening...');
 });
@@ -34,11 +36,26 @@ server.on('request',function(req,res){
     });
     //below can be folded into above else if?-think that would be good
   }else if (reqpath.substring(0,7) === '/todos/' && req.method === 'DELETE'){
-    req.on('end', function(){
-      delete dummydata[reqpath.substring(7)];
-    });
+    delete dummydata[reqpath.substring(7)];
+    //code below could be 204 if you want to be more specific
     res.statusCode = 200;
     res.end();
+  }else if(reqpath === '/sublogin' && req.method === 'POST'){
+    var body = '';
+    req.on('data', function(data){
+      body += data;
+    });
+    req.on('end', function(){
+      var unpw = querystring.parse(body);
+      if(dummyusers[unpw['un']] !== undefined && dummyusers[unpw['un']] === unpw['pw']){
+        res.setHeader('Location','/index.html');
+      }else{
+        res.setHeader('Location','/login.html');
+      }
+      res.statusCode = 301;
+      res.end();
+        //401 is for failed login
+    });
   }else{
     res.statusCode = 404;
     res.end();
